@@ -44,7 +44,7 @@ for f in available_frequencies:
     
     thread_benchmark = threading.Thread(
         target=run_command,
-        args=(["sudo python3 ../../jetson_benchmarks/benchmark.py --jetson_clocks --model_name vgg19 --csv_file_path ./benchmark_csv/nx-benchmarks.csv --model_dir ~/jetson_benchmarks"], f"benchmark_{f}.txt")
+        args=(["sudo python3 ~/jetson_benchmarks/benchmark.py --jetson_clocks --model_name vgg19 --csv_file_path ~/jetson_benchmarks/benchmark_csv/nx-benchmarks.csv --model_dir ~/jetson_benchmarks"], f"benchmark_{f}.txt")
     )
 
     thread_tegrastats = threading.Thread(
