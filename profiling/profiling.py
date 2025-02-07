@@ -1,6 +1,6 @@
 # run benchmark under different frequency.
 # collect data printed by tegrastats
-
+from utils import utilities, read_write_data, benchmark_argparser, run_benchmark_models
 import subprocess
 import os
 import signal
@@ -48,4 +48,10 @@ for f in available_frequencies:
     # run the benchmark in one process.
     thread_benchmark = threading.Thread(target=run_command, args=(["cd ../../jetson_benchmarks && sudo python3 benchmark.py --jetson_clocks --model_name vgg19 --csv_file_path ./benchmark_csv/nx-benchmarks.csv --model_dir ~/jetson_benchmarks"], f"benchmark_{f}"))
     # start tegrastats and output to result
-    thread_benchmark = threading.Thread(target=run_command, args=(["sudo tegrastats"], f"tegrastats{f}", True))
+    thread_tegrastats = threading.Thread(target=run_command, args=(["sudo tegrastats"], f"tegrastats{f}", True))
+
+    thread_benchmark.start()
+    thread_tegrastats.start()
+
+    thread_benchmark.join()
+    thread_tegrastats.join()
