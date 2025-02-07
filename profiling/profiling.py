@@ -43,6 +43,6 @@ for f in available_frequencies:
     set_gpu_frequency(f) # set frequency first
     # EMC is max default, no need to reset
     # run the benchmark in one process.
-    thread_benchmark = threading.Thread(target=run_command, args=([""], f"benchmark_{f}"))
+    thread_benchmark = threading.Thread(target=run_command, args=(["cd ../../jetson_benchmarks && sudo python3 benchmark.py --jetson_clocks --model_name vgg19 --csv_file_path ./benchmark_csv/nx-benchmarks.csv --model_dir ~/jetson_benchmarks"], f"benchmark_{f}"))
     # start tegrastats and output to result
     thread_benchmark = threading.Thread(target=run_command, args=(["sudo tegrastats"], f"tegrastats{f}", True))
