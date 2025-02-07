@@ -17,6 +17,9 @@ available_frequencies = [114750000, 216750000, 318750000,
 min_frequency_path = dir + '/min_freq'
 max_frequency_path = dir + '/max_freq'
 
+print(min_frequency_path)
+print(max_frequency_path)
+
 def set_gpu_frequency(f):
     with open(min_frequency_path, "w") as min_f_file, open(max_frequency_path, "w") as max_f_file:
         min_f_file.write(str(f))
