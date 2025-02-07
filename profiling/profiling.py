@@ -20,12 +20,9 @@ def set_gpu_frequency(f):
     if f not in available_frequencies:
         raise ValueError(f"Frequency {f} is not supported.")
     
-    try:
-        with open(min_frequency_path, "w") as min_f_file, open(max_frequency_path, "w") as max_f_file:
-            min_f_file.write(str(f) + "\n")
-            max_f_file.write(str(f) + "\n")
-    except OSError as e:
-        print(f"Failed to set GPU frequency: {e}")
+    with open(min_frequency_path, "w") as min_f_file, open(max_frequency_path, "w") as max_f_file:
+        min_f_file.write(str(f) + "\n")
+        max_f_file.write(str(f) + "\n")
 
 def run_command(command, output_file, is_command_t=False):
     global process_tegrastats
