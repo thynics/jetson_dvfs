@@ -36,7 +36,11 @@ def run_command(command, output_file, is_command_t=False):
             process_tegrastats = process
 
 for f in available_frequencies:
+    print("Setting Frequency...")
     set_gpu_frequency(f)
+    print("Frequency Set", f)
+
+    print("Running in", f)
     
     thread_benchmark = threading.Thread(
         target=run_command,
