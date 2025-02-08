@@ -35,7 +35,7 @@ for freq in available_frequencies:
     thread_tegrastats = None
 
     with open(f"benchmark_{freq}.txt", "w") as f:
-        thread_benchmark = subprocess.Popen(["sudo python3 ~/jetson_benchmarks/benchmark.py --jetson_clocks --model_name vgg19 --csv_file_path ~/jetson_benchmarks/benchmark_csv/nx-benchmarks.csv --model_dir ~/jetson_benchmarks"], stdout=f, stderr=subprocess.STDOUT, shell=True)
+        thread_benchmark = subprocess.Popen(["sudo python3 ~/jetson_benchmarks/benchmark.py --jetson_clocks --jetson_devkit tx2 --model_name vgg19 --csv_file_path ~/jetson_benchmarks/benchmark_csv/tx2-nano-benchmarks.csv --model_dir ~/jetson_benchmarks"], stdout=f, stderr=subprocess.STDOUT, shell=True)
     with open(f"tegrastats_{freq}.txt", "w") as f:
         thread_tegrastats = subprocess.Popen(["sudo tegrastats"], stdout=f, stderr=subprocess.STDOUT, shell=True)
     thread_benchmark.wait()
