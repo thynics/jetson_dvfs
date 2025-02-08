@@ -2,6 +2,7 @@ import subprocess
 import os
 import signal
 import threading
+import time
 
 dir = '/sys/devices/gpu.0/devfreq/17000000.gp10b'
 
@@ -36,8 +37,12 @@ for freq in available_frequencies:
 
     with open(f"benchmark_{freq}.txt", "w") as f:
         thread_benchmark = subprocess.Popen(["sudo python3 ~/jetson_benchmarks/benchmark.py --jetson_clocks --jetson_devkit tx2 --model_name vgg19 --csv_file_path ~/jetson_benchmarks/benchmark_csv/tx2-nano-benchmarks.csv --model_dir ~/jetson_benchmarks"], stdout=f, stderr=subprocess.STDOUT, shell=True)
+
     with open(f"tegrastats_{freq}.txt", "w") as f:
-        thread_tegrastats = subprocess.Popen(["sudo tegrastats"], stdout=f, stderr=subprocess.STDOUT, shell=True)
+        thread_tegrastats = subprocess.Popen(["sudo tegrastats"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, text=True)
+        for line in thread_tegrastats.stdout:
+            f.write(f'{time.time()}---{line}')
+            f.flush()
     thread_benchmark.wait()
     thread_tegrastats.terminate()
     thread_tegrastats.wait()
