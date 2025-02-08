@@ -24,21 +24,21 @@ def set_gpu_frequency(f):
         min_f_file.write(str(f) + "\n")
         max_f_file.write(str(f) + "\n")
 
-for f in available_frequencies:
+for freq in available_frequencies:
     print("Setting Frequency...")
-    set_gpu_frequency(f)
-    print("Frequency Set", f)
+    set_gpu_frequency(freq)
+    print("Frequency Set", freq)
 
-    print("Running in", f)
+    print("Running in", freq)
     
     thread_benchmark = None
     thread_tegrastats = None
 
-    with open(f"benchmark_{f}.txt", "w") as f:
+    with open(f"benchmark_{freq}.txt", "w") as f:
         thread_benchmark = subprocess.Popen(["sudo python3 ~/jetson_benchmarks/benchmark.py --jetson_clocks --model_name vgg19 --csv_file_path ~/jetson_benchmarks/benchmark_csv/nx-benchmarks.csv --model_dir ~/jetson_benchmarks"], stdout=f, stderr=subprocess.STDOUT, shell=True)
-    with open(f"tegrastats_{f}.txt", "w") as f:
+    with open(f"tegrastats_{freq}.txt", "w") as f:
         thread_tegrastats = subprocess.Popen(["sudo tegrastats"], stdout=f, stderr=subprocess.STDOUT, shell=True)
     thread_benchmark.wait()
     thread_tegrastats.terminate()
     thread_tegrastats.wait()
-    print(f"{f} Finished")
+    print(f"{freq} Finished")
