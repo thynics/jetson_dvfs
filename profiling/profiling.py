@@ -41,7 +41,7 @@ for freq in available_frequencies:
     with open(f"tegrastats_{freq}.txt", "w") as f:
         thread_tegrastats = subprocess.Popen(["sudo tegrastats"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         for line in thread_tegrastats.stdout:
-            f.write(f'{time.time()}---{line}')
+            f.write(f'{time.time()}---{line}\n')
             f.flush()
     thread_benchmark.wait()
     thread_tegrastats.terminate()
