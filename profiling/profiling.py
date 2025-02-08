@@ -24,17 +24,6 @@ def set_gpu_frequency(f):
         min_f_file.write(str(f) + "\n")
         max_f_file.write(str(f) + "\n")
 
-def run_command(command, output_file, is_command_t=False):
-    global process_tegrastats
-    with open(output_file, "w") as f:
-        process = subprocess.Popen(command, stdout=f, stderr=subprocess.STDOUT, shell=True)
-        if is_command_t:
-            process.wait()
-            if process_tegrastats:
-                os.killpg(os.getpgid(process_tegrastats.pid), signal.SIGTERM)
-        else:
-            process_tegrastats = process
-
 for f in available_frequencies:
     print("Setting Frequency...")
     set_gpu_frequency(f)
@@ -42,18 +31,14 @@ for f in available_frequencies:
 
     print("Running in", f)
     
-    thread_benchmark = threading.Thread(
-        target=run_command,
-        args=(["sudo python3 ~/jetson_benchmarks/benchmark.py --jetson_clocks --model_name vgg19 --csv_file_path ~/jetson_benchmarks/benchmark_csv/nx-benchmarks.csv --model_dir ~/jetson_benchmarks"], f"benchmark_{f}.txt")
-    )
+    thread_benchmark = None
+    thread_tegrastats = None
 
-    thread_tegrastats = threading.Thread(
-        target=run_command,
-        args=(["sudo tegrastats"], f"tegrastats_{f}.txt", True)
-    )
-
-    thread_benchmark.start()
-    thread_tegrastats.start()
-
-    thread_benchmark.join()
-    thread_tegrastats.join()
+    with open(f"benchmark_{f}.txt", "w") as f:
+        thread_benchmark = subprocess.Popen(["sudo python3 ~/jetson_benchmarks/benchmark.py --jetson_clocks --model_name vgg19 --csv_file_path ~/jetson_benchmarks/benchmark_csv/nx-benchmarks.csv --model_dir ~/jetson_benchmarks"], stdout=f, stderr=subprocess.STDOUT, shell=True)
+    with open(f"tegrastats_{f}.txt", "w") as f:
+        thread_tegrastats = subprocess.Popen(["sudo tegrastats"], stdout=f, stderr=subprocess.STDOUT, shell=True)
+    thread_benchmark.wait()
+    thread_tegrastats.terminate()
+    thread_tegrastats.wait()
+    print(f"{f} Finished")
