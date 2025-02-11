@@ -35,6 +35,9 @@ process_tegrastats = None
 def set_frequency(f, min_path, max_path, available_frequencies):
     if f not in available_frequencies:
         raise ValueError(f"Frequency {f} is not supported.")
+    with open(min_path, 'r') as min_f, open(max_path, 'r') as max_f:
+        min_f.write(f)
+        max_f.write(f)
 
 def set_gpu_frequency(f):
     set_frequency(f, min_gpu_frequency_path, max_gpu_frequency_path, available_gpu_frequencies)
