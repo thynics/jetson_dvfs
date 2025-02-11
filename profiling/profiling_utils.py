@@ -35,7 +35,7 @@ process_tegrastats = None
 def set_frequency(f, min_path, max_path, available_frequencies):
     if f not in available_frequencies:
         raise ValueError(f"Frequency {f} is not supported.")
-    with open(min_path, 'r') as min_f, open(max_path, 'r') as max_f:
+    with open(min_path, 'w') as min_f, open(max_path, 'w') as max_f:
         min_f.write(str(f))
         max_f.write(str(f))
 
