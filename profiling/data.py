@@ -16,6 +16,7 @@ mem_band_key = "EMC_FREQ"
 gpu_util_key = "GR3D_FREQ"
 gpu_power_key = "VDD_SYS_GPU"
 cpu_power_key = "VDD_SYS_CPU"
+mem_freq_key = "MEM_FREQ"
 tegrastats_keys = [mem_band_key, gpu_util_key, gpu_power_key, cpu_power_key]
 
 # return dict{str:float}
@@ -36,6 +37,7 @@ def extract(p:str):
         gpu_util_key: int(tmp[gpu_util_key].split("%")[0]),
         gpu_power_key: int(tmp[gpu_power_key].split("/")[0]),
         cpu_power_key: int(tmp[cpu_power_key].split("/")[0]),
+        mem_freq_key: int(tmp[mem_band_key].split("@")[1]),
     }
 
 available_frequencies = [114750000, 216750000, 318750000,
@@ -49,6 +51,7 @@ mem_util_list = []
 energy_list = []
 energy_effciency_list = []
 edp_list = []
+avg_data_list = []
 
 for freq in available_frequencies:
     # read 2 kind of files
@@ -70,9 +73,11 @@ for freq in available_frequencies:
         start = False
         total_util = 0
         total_power = 0
+        total_data = 0
         for l in tg_list:
             total_util += extract(l)[mem_band_key]
             total_power += extract(l)[gpu_power_key]
+            total_data += extract(l)[mem_freq_key]*extract(l)[mem_band_key]
         avg_util = total_util/len(tg_list)
         avg_power = total_power/len(tg_list)
 
@@ -81,6 +86,7 @@ for freq in available_frequencies:
         energy_list.append(avg_power * time)
         energy_effciency_list.append(perf/avg_power/time)
         edp_list.append(avg_power * time * time)
+        avg_data_list.append(total_data/len(tg_list))
 
 
 def plot_figure(x, y, x_name, y_name, module_name, title):
@@ -96,3 +102,4 @@ module_name = "vgg"
 plot_figure(available_frequencies, perf_list, "freq", "perf", module_name, "freq_vs_perf")
 plot_figure(available_frequencies, energy_list, "freq", "energy", module_name, "freq_vs_energy")
 plot_figure(mem_util_list, perf_list, "util", "perf", module_name, "util_vs_perf")
+plot_figure(avg_data_list, perf_list, "data", "perf", module_name, "data_vs_perf")
