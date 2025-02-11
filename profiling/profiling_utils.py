@@ -36,8 +36,8 @@ def set_frequency(f, min_path, max_path, available_frequencies):
     if f not in available_frequencies:
         raise ValueError(f"Frequency {f} is not supported.")
     with open(min_path, 'w') as min_f, open(max_path, 'w') as max_f:
-        min_f.write(str(f))
-        max_f.write(str(f))
+        min_f.write(str(f)+'\n')
+        max_f.write(str(f)+'\n')
 
 def set_gpu_frequency(f):
     set_frequency(f, min_gpu_frequency_path, max_gpu_frequency_path, available_gpu_frequencies)
