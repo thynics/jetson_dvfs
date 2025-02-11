@@ -46,12 +46,9 @@ def set_gpu_frequency(f):
     set_frequency(f, min_gpu_frequency_path, max_gpu_frequency_path, available_gpu_frequencies)
 
 def set_memory_frequency(f):
-    with open(EMC_FREQ_OVERRIDE, "w") as f:
-        f.write(str(1))
-    with open(EMC_UPDATE_FREQ, "w") as f:
-        f.write(str(f))
-    with open(EMC_STATE, "w") as f:
-        f.write(str(1))
+    os.system(f'echo 1 >/sys/kernel/debug/bpmp/debug/clk/emc/mrq_rate_locked')
+    os.system(f'echo {f} > /sys/kernel/debug/bpmp/debug/clk/emc/rate')
+    os.system(f'echo 1 > /sys/kernel/debug/bpmp/debug/clk/emc/state')
 
 
 for f in available_memory_frequency:
