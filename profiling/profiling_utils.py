@@ -24,26 +24,35 @@ min_mem_frequency_path = mem_dir + "min_rate"
 max_mem_frequency_path = mem_dir + "max_rate"
 
 available_memory_frequency = [
-    204000000,408000000,665600000,
+    408000000,665600000,
     800000000,1062400000,1331200000,
-    1600000000,1866000000,1331200000,
-    1866000000
+    1600000000,1866000000
 ]
 
 process_tegrastats = None
+
+EMC_UPDATE_FREQ="/sys/kernel/debug/bpmp/debug/clk/emc/rate"
+EMC_FREQ_OVERRIDE="/sys/kernel/debug/bpmp/debug/clk/emc/mrq_rate_locked"
+EMC_STATE="/sys/kernel/debug/bpmp/debug/clk/emc/state"
 
 def set_frequency(f, min_path, max_path, available_frequencies):
     if f not in available_frequencies:
         raise ValueError(f"Frequency {f} is not supported.")
     with open(min_path, 'w') as min_f, open(max_path, 'w') as max_f:
-        min_f.write(str(f)+'\n')
-        max_f.write(str(f)+'\n')
+        min_f.write(str(f))
+        max_f.write(str(f))
 
 def set_gpu_frequency(f):
     set_frequency(f, min_gpu_frequency_path, max_gpu_frequency_path, available_gpu_frequencies)
 
 def set_memory_frequency(f):
-    set_frequency(f, min_mem_frequency_path, max_mem_frequency_path, available_memory_frequency)
+    with open(EMC_FREQ_OVERRIDE, "w") as f:
+        f.write(str(1))
+    with open(EMC_UPDATE_FREQ, "w") as f:
+        f.write(str(f))
+    with open(EMC_STATE, "w") as f:
+        f.write(str(1))
+
 
 for f in available_memory_frequency:
     set_memory_frequency(f)
