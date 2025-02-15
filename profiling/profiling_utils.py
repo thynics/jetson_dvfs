@@ -61,20 +61,17 @@ async def random_set_memory_frequency():
 
 tegrastats_command_thread = None
 async def tegrastats_record():
-    process = subprocess.Popen(
-        ["sudo tegrastats"],
-        stdout=subprocess.STDOUT,
-        stderr=subprocess.PIPE
-    )
+    # 运行子进程，并捕获 stdout
     global tegrastats_command_thread
-    tegrastats_command_thread = process
-    with open("./tegrastats_output.txt", "w") as file:
-        for line in process.stdout:
+    tegrastats_command_thread = subprocess.Popen(["sudo tegrastats"], shell=True, stdout=subprocess.STDOUT, stderr=subprocess.PIPE)
+    # 持续读取 stdout 并写入文件
+    with open("./tegrastats_output.txt", "w") as tf:
+        for line in iter(tegrastats_command_thread.stdout.readline, ''):
             decoded_line = line.decode("utf-8").strip()
             output_line = f"{time.time()}---{decoded_line}"
-            fcntl.flock(file, fcntl.LOCK_EX)
-            file.write(output_line + "\n")
-            fcntl.flock(file, fcntl.LOCK_UN)
+            fcntl.flock(tf, fcntl.LOCK_EX)
+            tf.write(f'{output_line}\n')
+            fcntl.flock(tf, fcntl.LOCK_UN)
 
 def run_benchmarks():
     # run benchmark in different gpu frequency and then change emc frequency frequently
