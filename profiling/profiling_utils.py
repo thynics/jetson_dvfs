@@ -3,6 +3,9 @@ import os
 import signal
 import threading
 import time
+import random
+import asyncio
+import fcntl
 
 # we will try to change gpu frequency and memory frequency randomly
 # to see performance in different utilization and memory frequency
@@ -24,8 +27,7 @@ min_mem_frequency_path = mem_dir + "min_rate"
 max_mem_frequency_path = mem_dir + "max_rate"
 
 available_memory_frequency = [
-    408000000,665600000,
-    800000000,1062400000,1331200000,
+    1062400000,1331200000,
     1600000000,1866000000
 ]
 
@@ -51,14 +53,57 @@ def set_memory_frequency(f):
     os.system(f'echo 1 > /sys/kernel/debug/bpmp/debug/clk/emc/state')
 
 
-for f in available_memory_frequency:
-    set_memory_frequency(f)
-    time.sleep(5)
+# random change emc frequency
+async def random_set_memory_frequency():
+    while(True):
+        set_memory_frequency(random.choice(available_memory_frequency))
+        time.sleep(10)
+
+tegrastats_command_thread = None
+async def tegrastats_record():
+    process = subprocess.Popen(
+        ["sudo tegrastats"],
+        stdout=subprocess.STDOUT,
+        stderr=subprocess.PIPE
+    )
+    global tegrastats_command_thread
+    tegrastats_command_thread = process
+    with open("./tegrastats_output.txt", "w") as file:
+        for line in process.stdout:
+            decoded_line = line.decode("utf-8").strip()
+            output_line = f"{time.time()}---{decoded_line}"
+            fcntl.flock(file, fcntl.LOCK_EX)
+            file.write(output_line + "\n")
+            fcntl.flock(file, fcntl.LOCK_UN)
+
+def run_benchmarks():
+    # run benchmark in different gpu frequency and then change emc frequency frequently
+    for gpu_f in available_gpu_frequencies:
+        set_gpu_frequency(gpu_f)
+        time.sleep(10)
+        with open("./tegrastats_output.txt", "w") as file:
+            fcntl.flock(file, fcntl.LOCK_EX)
+            file.write(f'GPU frequency {gpu_f} start, time:{time.time()}\n')
+            fcntl.flock(file, fcntl.LOCK_UN)
+        thread_benchmark = subprocess.Popen([
+        "sudo python3 ~/jetson_benchmarks/benchmark.py \
+        --jetson_clocks --jetson_devkit tx2 --model_name vgg19\
+         --csv_file_path ~/jetson_benchmarks/benchmark_csv/tx2-nano-benchmarks.csv\
+          --model_dir ~/jetson_benchmarks"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        thread_benchmark.wait()
+        with open("./tegrastats_output.txt", "w") as file:
+            fcntl.flock(file, fcntl.LOCK_EX)
+            file.write(f'GPU frequency {gpu_f} end, time:{time.time()}\n')
+            fcntl.flock(file, fcntl.LOCK_UN)
 
 
-exit(0)
-thread_benchmark = subprocess.Popen([
-    "sudo python3 ~/jetson_benchmarks/benchmark.py \
-    --jetson_clocks --jetson_devkit tx2 --model_name vgg19\
-     --csv_file_path ~/jetson_benchmarks/benchmark_csv/tx2-nano-benchmarks.csv\
-      --model_dir ~/jetson_benchmarks"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+async def main():
+    memory_task = asyncio.create_task(random_set_memory_frequency())
+    tegrastats_task = asyncio.create_task(tegrastats_record())
+    benchmarks_task = asyncio.create_task(run_benchmarks())
+    await benchmarks_task
+    memory_task.cancel()
+    tegrastats_task.cancel()
+    tegrastats_command_thread.terminate()
+asyncio.run(main())
+
