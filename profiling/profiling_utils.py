@@ -92,6 +92,7 @@ async def main():
     memory_task = asyncio.create_task(random_set_memory_frequency())
     tegrastats_task = asyncio.create_task(tegrastats_record())
     benchmarks_task = asyncio.create_task(run_benchmarks())
+    print("all task start")
     await benchmarks_task
     memory_task.cancel()
     tegrastats_task.cancel()
