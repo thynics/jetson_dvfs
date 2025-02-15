@@ -49,11 +49,9 @@ async def tegrastats_record():
             line = await tegrastats_command_thread.stdout.readline()
             if not line:
                 break
-
             output_line = f"{time.time()}---{line.decode('utf-8').strip()}"
             tf.write(f'{output_line}\n')
             tf.flush()
-            print(output_line)
 
 
 async def run_benchmarks():
@@ -85,8 +83,8 @@ async def main():
 
     print("all task start")
 
-    await benchmarks_task  # 等待 benchmark 完成
-    memory_task.cancel()   # 取消其他任务
+    await benchmarks_task
+    memory_task.cancel()
     tegrastats_task.cancel()
 
     if tegrastats_command_thread:
