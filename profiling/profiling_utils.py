@@ -106,6 +106,5 @@ async def main():
     tegrastats_task.cancel()
     tegrastats_command_thread.terminate()
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
+asyncio.run(main())
 
