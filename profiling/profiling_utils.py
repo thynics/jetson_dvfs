@@ -63,11 +63,13 @@ tegrastats_command_thread = None
 async def tegrastats_record():
     global tegrastats_command_thread
     tegrastats_command_thread = subprocess.Popen(["sudo tegrastats"], shell=True, stdout=subprocess.STDOUT, stderr=subprocess.PIPE)
+    print("create tegrastats success")
     with open("./tegrastats_output.txt", "w") as tf:
         for line in iter(tegrastats_command_thread.stdout.readline, ''):
             decoded_line = line.decode("utf-8").strip()
             output_line = f"{time.time()}---{decoded_line}"
             tf.write(f'{output_line}\n')
+            print(line)
 
 def run_benchmarks():
     # run benchmark in different gpu frequency and then change emc frequency frequently
