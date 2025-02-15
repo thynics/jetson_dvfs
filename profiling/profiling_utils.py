@@ -61,17 +61,13 @@ async def random_set_memory_frequency():
 
 tegrastats_command_thread = None
 async def tegrastats_record():
-    # 运行子进程，并捕获 stdout
     global tegrastats_command_thread
     tegrastats_command_thread = subprocess.Popen(["sudo tegrastats"], shell=True, stdout=subprocess.STDOUT, stderr=subprocess.PIPE)
-    # 持续读取 stdout 并写入文件
     with open("./tegrastats_output.txt", "w") as tf:
         for line in iter(tegrastats_command_thread.stdout.readline, ''):
             decoded_line = line.decode("utf-8").strip()
             output_line = f"{time.time()}---{decoded_line}"
-            fcntl.flock(tf, fcntl.LOCK_EX)
             tf.write(f'{output_line}\n')
-            fcntl.flock(tf, fcntl.LOCK_UN)
 
 def run_benchmarks():
     # run benchmark in different gpu frequency and then change emc frequency frequently
@@ -79,9 +75,7 @@ def run_benchmarks():
         set_gpu_frequency(gpu_f)
         time.sleep(10)
         with open("./tegrastats_output.txt", "w") as file:
-            fcntl.flock(file, fcntl.LOCK_EX)
             file.write(f'GPU frequency {gpu_f} start, time:{time.time()}\n')
-            fcntl.flock(file, fcntl.LOCK_UN)
         thread_benchmark = subprocess.Popen([
         "sudo python3 ~/jetson_benchmarks/benchmark.py \
         --jetson_clocks --jetson_devkit tx2 --model_name vgg19\
@@ -89,9 +83,7 @@ def run_benchmarks():
           --model_dir ~/jetson_benchmarks"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         thread_benchmark.wait()
         with open("./tegrastats_output.txt", "w") as file:
-            fcntl.flock(file, fcntl.LOCK_EX)
             file.write(f'GPU frequency {gpu_f} end, time:{time.time()}\n')
-            fcntl.flock(file, fcntl.LOCK_UN)
 
 
 async def main():
