@@ -14,12 +14,18 @@ available_gpu_frequencies = [114750000, 216750000, 318750000,
 min_gpu_frequency_path = gpu_dir + 'min_freq'
 max_gpu_frequency_path = gpu_dir + 'max_freq'
 
+current_gpu_frequency = 1300500000
+
 mem_dir = '/sys/kernel/debug/bpmp/debug/clk/emc/'
 available_memory_frequency = [1062400000, 1331200000, 1600000000, 1866000000]
 
 def set_gpu_frequency(f):
-    os.system(f'echo {f} > {min_gpu_frequency_path}')
-    os.system(f'echo {f} > {max_gpu_frequency_path}')
+    if f > current_gpu_frequency:
+        os.system(f'echo {f} > {max_gpu_frequency_path}')
+        os.system(f'echo {f} > {min_gpu_frequency_path}')
+    if f < current_gpu_frequency:
+        os.system(f'echo {f} > {min_gpu_frequency_path}')
+        os.system(f'echo {f} > {max_gpu_frequency_path}')
 
 def set_memory_frequency(f):
     os.system(f'echo 1 >/sys/kernel/debug/bpmp/debug/clk/emc/mrq_rate_locked')
@@ -75,6 +81,10 @@ async def run_benchmarks():
             await process.wait()
 
 async def main():
+    global current_gpu_frequency
+    with open(max_gpu_frequency_path, "a") as f:
+        current_gpu_frequency = int(f.read())
+
     memory_task = asyncio.create_task(random_set_memory_frequency())
     tegrastats_task = asyncio.create_task(tegrastats_record())
     benchmarks_task = asyncio.create_task(run_benchmarks())
