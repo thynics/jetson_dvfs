@@ -1,0 +1,14 @@
+Exec Start: 1739719138.7374618
+------------Executing super_resolution_bsd500------------
+
+Exec End: 1739719934.8259895
+---------------------- 358.6296666666667 0 0
+--------------------------
+
+Model Name: super_resolution_bsd500 
+FPS:2.79 
+
+--------------------------
+
+Wall Time for running model (secs): 796.0885694026947
+
