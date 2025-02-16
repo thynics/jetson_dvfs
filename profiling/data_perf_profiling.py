@@ -19,8 +19,8 @@ available_memory_frequency = [1062400000, 1331200000, 1600000000, 1866000000]
 
 def set_gpu_frequency(f):
     with open(min_gpu_frequency_path, 'w') as min_f, open(max_gpu_frequency_path, 'w') as max_f:
-        min_f.write(str(f))
-        max_f.write(str(f))
+        min_f.write(str(f)+"\n")
+        max_f.write(str(f)+"\n")
 
 def set_memory_frequency(f):
     os.system(f'echo 1 >/sys/kernel/debug/bpmp/debug/clk/emc/mrq_rate_locked')
