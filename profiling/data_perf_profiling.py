@@ -84,9 +84,7 @@ async def run_benchmarks():
             await process.wait()
 
 async def main():
-    global current_gpu_frequency
-    with open(max_gpu_frequency_path, "a") as f:
-        current_gpu_frequency = int(f.read())
+    set_gpu_frequency(current_gpu_frequency)
 
     memory_task = asyncio.create_task(random_set_memory_frequency())
     tegrastats_task = asyncio.create_task(tegrastats_record())
