@@ -69,7 +69,7 @@ async def run_benchmarks():
             set_gpu_frequency(gpu_f)
             await asyncio.sleep(10)
             process = await asyncio.create_subprocess_shell(
-                get_benchmark_command(f"bm > {bm}_output.txt"),
+                get_benchmark_command(f"bm > {bm}_{gpu_f}_output.txt"),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.STDOUT
             )
