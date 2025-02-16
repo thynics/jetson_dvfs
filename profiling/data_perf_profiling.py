@@ -20,10 +20,13 @@ mem_dir = '/sys/kernel/debug/bpmp/debug/clk/emc/'
 available_memory_frequency = [1062400000, 1331200000, 1600000000, 1866000000]
 
 def set_gpu_frequency(f):
+    global current_gpu_frequency
     if f > current_gpu_frequency:
+        current_gpu_frequency = f
         os.system(f'echo {f} > {max_gpu_frequency_path}')
         os.system(f'echo {f} > {min_gpu_frequency_path}')
     if f < current_gpu_frequency:
+        current_gpu_frequency = f
         os.system(f'echo {f} > {min_gpu_frequency_path}')
         os.system(f'echo {f} > {max_gpu_frequency_path}')
 
