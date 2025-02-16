@@ -53,6 +53,7 @@ async def tegrastats_record():
             tf.write(f'{output_line}\n')
             tf.flush()
 
+dir = "/media/work_data/long/jetson_benchmarks"
 
 async def run_benchmarks():
     for gpu_f in available_gpu_frequencies:
@@ -63,10 +64,10 @@ async def run_benchmarks():
             file.write(f'GPU frequency {gpu_f} start, time:{time.time()}\n')
 
         process = await asyncio.create_subprocess_shell(
-            "sudo python3 /home/long/jetson_benchmarks/benchmark.py \
+            "sudo python3 /media/work_data/long/jetson_benchmarks/benchmark.py \
             --jetson_clocks --jetson_devkit tx2 --model_name vgg19\
-            --csv_file_path /home/long/jetson_benchmarks/benchmark_csv/tx2-nano-benchmarks.csv\
-            --model_dir /home/long/jetson_benchmarks",
+            --csv_file_path /media/work_data/long/jetson_benchmarks/benchmark_csv/tx2-nano-benchmarks.csv\
+            --model_dir /media/work_data/long/jetson_benchmarks",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT
         )
