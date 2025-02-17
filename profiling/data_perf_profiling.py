@@ -35,12 +35,6 @@ def set_memory_frequency(f):
     os.system(f'echo {f} > /sys/kernel/debug/bpmp/debug/clk/emc/rate')
     os.system(f'echo 1 > /sys/kernel/debug/bpmp/debug/clk/emc/state')
 
-
-async def random_set_memory_frequency():
-    while True:
-        set_memory_frequency(random.choice(available_memory_frequency))
-        await asyncio.sleep(10)
-
 tegrastats_command_thread = None
 
 async def tegrastats_record():
@@ -69,31 +63,31 @@ def get_benchmark_command(benchmark_name):
             --csv_file_path {benchmark_dir}/benchmark_csv/tx2-nano-benchmarks.csv\
             --model_dir {benchmark_dir}"
 
-benchmark_list = ["inception_v4", "vgg19", "super_resolution", "unet", "pose_estimation", "tiny-yolov3", "resnet", "ssd-mobilenet-v1", "ssd-resnet34"]
+benchmark_list = ["inception_v4", "vgg19", "tiny-yolov3", "resnet"]
 
 async def run_benchmarks():
     for bm in benchmark_list:
         for gpu_f in available_gpu_frequencies:
-            set_gpu_frequency(gpu_f)
-            await asyncio.sleep(10)
-            process = await asyncio.create_subprocess_shell(
-                f"{get_benchmark_command(bm)} > {bm}_{gpu_f}_output.txt",
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.STDOUT
-            )
-            await process.wait()
+            for mem_f in available_memory_frequency:
+                set_memory_frequency(mem_f)
+                set_gpu_frequency(gpu_f)
+                await asyncio.sleep(10)
+                process = await asyncio.create_subprocess_shell(
+                    f"{get_benchmark_command(bm)} > {bm}_{gpu_f}_{mem_f}_output.txt",
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.STDOUT
+                )
+                await process.wait()
 
 async def main():
     set_gpu_frequency(current_gpu_frequency)
 
-    memory_task = asyncio.create_task(random_set_memory_frequency())
     tegrastats_task = asyncio.create_task(tegrastats_record())
     benchmarks_task = asyncio.create_task(run_benchmarks())
 
     print("all task start")
 
     await benchmarks_task
-    memory_task.cancel()
     tegrastats_task.cancel()
 
     if tegrastats_command_thread:
